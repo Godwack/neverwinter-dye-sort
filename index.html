@@ -94,7 +94,7 @@ var dyePacks = [
 
 function luminance709(R, G, B) {
     "use strict";
-    return (2126 * R + 7152 * G + 722 * B) / 10000;
+    return (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255 * 100;
 }
 
 function makeLink(text, href, title) {
@@ -112,9 +112,9 @@ function makeTooltip(dye, channel, selected) {
     innerHTML += "<br>rgb(" + dye[channel + "R"] + ", " + dye[channel + "G"] + ", " + dye[channel + "B"] + ")";
     if (selected === "primaryLuminance" || selected === "secondaryLuminance"
             || selected === "accentLuminance" || selected === "deltaLuminance") {
-        innerHTML += "<br>luminance: " + dye[channel + "Luminance"].toFixed(1) + "</span>";
+        innerHTML += "<br>luminance: " + dye[channel + "Luminance"].toFixed(1) + "%</span>";
     } else if (selected === "primaryHue" || selected === "secondaryHue" || selected === "accentHue") {
-        innerHTML += "<br>hue: " + parseInt(dye[channel + "Hue"] * 60) + "°";
+        innerHTML += "<br>hue: " + dye[channel + "Hue"].toFixed(1) + "°</span>";
     }
     return innerHTML;
 }
@@ -178,18 +178,18 @@ function getHue(dye, channel) {
     if (chroma === 0) {
         return 0;
     }
+    var hue;
     if (maximum === dye[channel + "R"]) {
+        hue = (dye[channel + "G"] - dye[channel + "B"]) / chroma;
         if (dye[channel + "B"] > dye[channel + "G"]) {
-            return (dye[channel + "G"] - dye[channel + "B"]) / chroma + 6;
+            hue += 6;
         }
-        return (dye[channel + "G"] - dye[channel + "B"]) / chroma;
+    } else if (maximum === dye[channel + "G"]) {
+        hue = (dye[channel + "B"] - dye[channel + "R"]) / chroma + 2;
+    } else if (maximum === dye[channel + "B"]) {
+        hue = (dye[channel + "R"] - dye[channel + "G"]) / chroma + 4;
     }
-    if (maximum === dye[channel + "G"]) {
-        return (dye[channel + "B"] - dye[channel + "R"]) / chroma + 2;
-    }
-    if (maximum === dye[channel + "B"]) {
-        return (dye[channel + "R"] - dye[channel + "G"]) / chroma + 4;
-    }
+    return hue * 60;
 }
 
 function initialize() {
