@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Neverwinter Dye Sort</title>
+<style>
+a {text-decoration: none;}
+a:hover {text-decoration: underline;}
+table {border-collapse: collapse; width: 100%;}
+td.nowrap {white-space: nowrap;}
+td.tooltip {position: relative; width: 30%;}
+td.tooltip span {background: white; border: 1px dotted black; margin-left: -999em; position: absolute; text-align: center; top: -40px;}
+td.tooltip:hover span {margin-left: 0; z-index: 99;}
+</style>
+</head>
+<body>
+Sort: <select id="select" onchange="update()">
+  <option value="primaryLuminance">Primary Luminance</option>
+  <option value="secondaryLuminance">Secondary Luminance</option>
+  <option value="accentLuminance">Accent Luminance</option>
+  <option value="deltaLuminance">Primary Luminance - Secondary Luminance</option>
+  <option value="primaryHue">Primary Hue</option>
+  <option value="secondaryHue">Secondary Hue</option>
+  <option value="accentHue">Accent Hue</option>
+</select>
+<table id="table">
+  <tr>
+    <th>Name</th>
+    <th>Primary</th>
+    <th>Secondary</th>
+    <th>Accent</th>
+  </tr>
+</table>
+<script>
+var dyePacks = [
+    {itemName: "Blessed Gold Dye Pack", accent: "#392a12", primary: "#b8a559", secondary: "#184a45"},
+    {itemName: "Bluefire Dye Pack", accent: "#90e4ff", primary: "#2a2634", secondary: "#007eff"},
+    {itemName: "Celestial Grace Dye Pack", accent: "#7e7542", primary: "#c6ba9c", secondary: "#3b364d"},
+    {itemName: "Chill Wind Dye Pack", accent: "#5b759e", primary: "#9fb3d4", secondary: "#37465d"},
+    {itemName: "Control Wizard's Dye Pack", accent: "#445459", primary: "#1c2646", secondary: "#1c1c28"},
+    {itemName: "Coppersmith Dye Pack", accent: "#423a1a", primary: "#c1ac72", secondary: "#673f1c"},
+    {itemName: "Crimson Dusk Dye Pack", accent: "#020202", primary: "#560d0b", secondary: "#2a0404"},
+    {itemName: "Cruelty of the Dragonflight", accent: "#3c3929", primary: "#040608", secondary: "#b38f52"},
+    {itemName: "Devoted Cleric's Dye Pack", accent: "#ac9369", primary: "#a3bfd8", secondary: "#212b38"},
+    {itemName: "Doomguide Dye Pack", accent: "#3f4b4b", primary: "#171a1c", secondary: "#2a1c15"},
+    {itemName: "Draconic Black Dye Pack", accent: "#a29d89", primary: "#040608", secondary: "#331d19"},
+    {itemName: "Draconic Blue Dye Pack", accent: "#647c77", primary: "#142642", secondary: "#262523"},
+    {itemName: "Draconic Green Dye Pack", accent: "#776d52", primary: "#302a22", secondary: "#31452e"},
+    {itemName: "Draconic Red Dye Pack", accent: "#77736d", primary: "#2f231f", secondary: "#411f1f"},
+    {itemName: "Draconic White Dye Pack", accent: "#461a1a", primary: "#b3bcc5", secondary: "#443f2d"},
+    {itemName: "Dragonslayer's Dye Pack", accent: "#462702", primary: "#601c1d", secondary: "#19212d"},
+    {itemName: "Ebon Darkness Dye Pack", accent: "#1f1c0e", primary: "#040404", secondary: "#423d2f"},
+    {itemName: "Elemental Ember Dye Pack", accent: "#413d31", primary: "#591f0e", secondary: "#9c6026"},
+    {itemName: "Emerald Dragonscale Dye Pack", accent: "#484941", primary: "#213117", secondary: "#1f240e"},
+    {itemName: "Ethereal Skies Dye Pack", accent: "#bcc4cc", primary: "#113662", secondary: "#151a1f"},
+    {itemName: "Gray Wolf Tribe Dye Pack", accent: "#301a1a", primary: "#253d5c", secondary: "#636654"},
+    {itemName: "Great Weapon Fighter's Dye Pack", accent: "#231d0a", primary: "#2d2f34", secondary: "#52423d"},
+    {itemName: "Guardian Fighter's Dye Pack", accent: "#837b5b", primary: "#363d4d", secondary: "#181a1f"},
+    {itemName: "Helmite Dye Pack", accent: "#b7b38e", primary: "#687177", secondary: "#3d3e2e"},
+    {itemName: "High Harvest Dye Pack", accent: "#261208", primary: "#91a8bf", secondary: "#896034"},
+    {itemName: "Hunter Ranger's Dye Pack", accent: "#6b4f23", primary: "#2a1e0f", secondary: "#43592f"},
+    {itemName: "Jungle Cloak Dye Pack", accent: "#0a0b09", primary: "#62622e", secondary: "#1d4916"},
+    {itemName: "Lliira's Night Dye Pack", accent: "#0e2e79", primary: "#812a1c", secondary: "#e5d492"},
+    {itemName: "Many-Arrows Dye Pack", accent: "#1a2224", primary: "#403d31", secondary: "#2d0d07"},
+    {itemName: "Masquerade Dye Pack", accent: "#caaa5e", primary: "#0b1108", secondary: "#cf8a13"},
+    {itemName: "Mercurial Gold Dye Pack", accent: "#c3a85d", primary: "#9a7e2d", secondary: "#604d2f"},
+    {itemName: "Moon Shadow Dye Pack", accent: "#1a212a", primary: "#020a11", secondary: "#0d1a2a"},
+    {itemName: "Neverwintan Royal Dye Pack", accent: "#6e8789", primary: "#3b2149", secondary: "#41678e"},
+    {itemName: "Nightmare Dye Pack", accent: "#3f3a24", primary: "#040404", secondary: "#2a0a0a"},
+    {itemName: "Pride of the Dragonflight", accent: "#3d3823", primary: "#331d19", secondary: "#110907"},
+    {itemName: "Pride of the Pack", accent: "#150f03", primary: "#a88f69", secondary: "#483216"},
+    {itemName: "Roar of the Pack", accent: "#150f03", primary: "#81725c", secondary: "#2a1b06"},
+    {itemName: "Scourge Warlock's Dye Pack", accent: "#6e80af", primary: "#2f343f", secondary: "#3a212a"},
+    {itemName: "Searing Magma Dye Pack", accent: "#ddb170", primary: "#b3500d", secondary: "#801408"},
+    {itemName: "Sunite Heart Dye Pack", accent: "#baa3af", primary: "#672f60", secondary: "#a87c93"},
+    {itemName: "Swashbuckler Dye Pack", accent: "#706d60", primary: "#260f0f", secondary: "#090c0b"},
+    {itemName: "Sylvan Grove Dye Pack", accent: "#bfae67", primary: "#33462a", secondary: "#543f23"},
+    {itemName: "Treachery of the Dragonflight", accent: "#8b8883", primary: "#171f16", secondary: "#152512"},
+    {itemName: "Trickster Rogue's Dye Pack", accent: "#544938", primary: "#2b2621", secondary: "#121212"},
+    {itemName: "Vanity of the Dragonflight", accent: "#0c0f14", primary: "#0e1b30", secondary: "#13294f"},
+    {itemName: "Veteran Dye Pack", accent: "#716664", primary: "#305283", secondary: "#111b2d"},
+    {itemName: "Winterwolf Dye Pack", accent: "#9cc4df", primary: "#797e83", secondary: "#b3babc"},
+    {itemName: "Bottle of Black Dye", accent: "#040404", primary: "#040404", secondary: "#040404"},
+    {itemName: "Bottle of Blue Dye", accent: "#2a3d67", primary: "#2a3d67", secondary: "#2a3d67"},
+    {itemName: "Bottle of Green Dye", accent: "#264b24", primary: "#264b24", secondary: "#264b24"},
+    {itemName: "Bottle of Pink Dye", accent: "#99526b", primary: "#99526b", secondary: "#99526b"},
+    {itemName: "Bottle of Purple Dye", accent: "#462b59", primary: "#462b59", secondary: "#462b59"},
+    {itemName: "Bottle of Red Dye", accent: "#591a1c", primary: "#591a1c", secondary: "#591a1c"},
+    {itemName: "Bottle of White Dye", accent: "#afafaf", primary: "#afafaf", secondary: "#afafaf"},
+    {itemName: "Adamant", accent: "#19231a", primary: "#051306", secondary: "#b0b0b0"},
+    {itemName: "Dark Leather", accent: "#0e1015", primary: "#17181c", secondary: "#443632"},
+    {itemName: "Samite", accent: "#3b260a", primary: "#5e1f1f", secondary: "#fafffb"}
+];
+
+function luminance709(R, G, B) {
+    "use strict";
+    return (2126 * R + 7152 * G + 722 * B) / 10000;
+}
+
+function makeLink(text, href, title) {
+    "use strict";
+    var link = '<a href="' + href;
+    if (title) {
+        link += '" title="' + title;
+    }
+    return link + '">' + text + "</a>";
+}
+
+function makeTooltip(dye, channel, selected) {
+    "use strict";
+    var innerHTML = "<span>" + dye[channel];
+    innerHTML += "<br>rgb(" + dye[channel + "R"] + ", " + dye[channel + "G"] + ", " + dye[channel + "B"] + ")";
+    if (selected === "primaryLuminance" || selected === "secondaryLuminance"
+            || selected === "accentLuminance" || selected === "deltaLuminance") {
+        innerHTML += "<br>luminance: " + dye[channel + "Luminance"].toFixed(1) + "</span>";
+    } else if (selected === "primaryHue" || selected === "secondaryHue" || selected === "accentHue") {
+        innerHTML += "<br>hue: " + parseInt(dye[channel + "Hue"] * 60) + "°";
+    }
+    return innerHTML;
+}
+
+function addRow(table, dye, selected) {
+    "use strict";
+    var row = table.insertRow(table.rows.length);
+    var cell = row.insertCell();
+    cell.innerHTML = makeLink(dye.itemName, "http://neverwinter.gamepedia.com/" + dye.itemName.replace(/\ /g, "_"));
+    cell.className = "nowrap";
+    cell = row.insertCell();
+    cell.innerHTML = makeTooltip(dye, "primary", selected);
+    cell.style.backgroundColor = dye.primary;
+    cell.className = "tooltip";
+    cell = row.insertCell();
+    cell.innerHTML = makeTooltip(dye, "secondary", selected);
+    cell.style.backgroundColor = dye.secondary;
+    cell.className = "tooltip";
+    cell = row.insertCell();
+    cell.innerHTML = makeTooltip(dye, "accent", selected);
+    cell.style.backgroundColor = dye.accent;
+    cell.className = "tooltip";
+}
+
+function update() {
+    "use strict";
+    var selected = document.getElementById("select").value;
+    var table = document.getElementById("table");
+    while (table.rows.length > 1) {
+        table.deleteRow(-1);
+    }
+    var sorted = dyePacks.sort(function (a, b) {
+        return a[selected] - b[selected];
+    });
+    var i;
+    for (i = 0; i < sorted.length; i += 1) {
+        addRow(table, sorted[i], selected);
+    }
+}
+
+function getR(hexcode) {
+    "use strict";
+    return parseInt(hexcode.substr(1, 2), 16);
+}
+
+function getG(hexcode) {
+    "use strict";
+    return parseInt(hexcode.substr(3, 2), 16);
+}
+
+function getB(hexcode) {
+    "use strict";
+    return parseInt(hexcode.substr(5, 2), 16);
+}
+
+function getHue(dye, channel) {
+    "use strict";
+    var maximum = Math.max(dye[channel + "R"], dye[channel + "G"], dye[channel + "B"]);
+    var minimum = Math.min(dye[channel + "R"], dye[channel + "G"], dye[channel + "B"]);
+    var chroma = maximum - minimum;
+    if (chroma === 0) {
+        return 0;
+    }
+    if (maximum === dye[channel + "R"]) {
+        if (dye[channel + "B"] > dye[channel + "G"]) {
+            return (dye[channel + "G"] - dye[channel + "B"]) / chroma + 6;
+        }
+        return (dye[channel + "G"] - dye[channel + "B"]) / chroma;
+    }
+    if (maximum === dye[channel + "G"]) {
+        return (dye[channel + "B"] - dye[channel + "R"]) / chroma + 2;
+    }
+    if (maximum === dye[channel + "B"]) {
+        return (dye[channel + "R"] - dye[channel + "G"]) / chroma + 4;
+    }
+}
+
+function initialize() {
+    "use strict";
+    var i;
+    var dye;
+    for (i = 0; i < dyePacks.length; i += 1) {
+        dye = dyePacks[i];
+        dye.primaryR = getR(dye.primary);
+        dye.primaryG = getG(dye.primary);
+        dye.primaryB = getB(dye.primary);
+        dye.secondaryR = getR(dye.secondary);
+        dye.secondaryG = getG(dye.secondary);
+        dye.secondaryB = getB(dye.secondary);
+        dye.accentR = getR(dye.accent);
+        dye.accentG = getG(dye.accent);
+        dye.accentB = getB(dye.accent);
+        dye.primaryHue = getHue(dye, "primary");
+        dye.secondaryHue = getHue(dye, "secondary");
+        dye.accentHue = getHue(dye, "accent");
+        dye.primaryLuminance = luminance709(dye.primaryR, dye.primaryG, dye.primaryB);
+        dye.secondaryLuminance = luminance709(dye.secondaryR, dye.secondaryG, dye.secondaryB);
+        dye.accentLuminance = luminance709(dye.accentR, dye.accentG, dye.accentB);
+        dye.deltaLuminance = dye.primaryLuminance - dye.secondaryLuminance;
+    }
+    update();
+}
+
+initialize();
+</script>
+</body>
+</html>
