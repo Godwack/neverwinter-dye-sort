@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Neverwinter Dye Sort</title>
@@ -99,11 +99,11 @@ function luminance709(R, G, B) {
 
 function makeLink(text, href, title) {
     "use strict";
-    var link = '<a href="' + href;
+    var link = "<a href=\"" + href;
     if (title) {
-        link += '" title="' + title;
+        link += "\" title=\"" + title;
     }
-    return link + '">' + text + "</a>";
+    return link + "\">" + text + "</a>";
 }
 
 function makeTooltip(dye, channel, selected) {
