@@ -97,15 +97,6 @@ function luminance709(R, G, B) {
     return (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255 * 100;
 }
 
-function makeLink(text, href, title) {
-    "use strict";
-    var link = "<a href=\"" + href;
-    if (title) {
-        link += "\" title=\"" + title;
-    }
-    return link + "\">" + text + "</a>";
-}
-
 function makeTooltip(dye, channel, selected) {
     "use strict";
     var innerHTML = "<span>" + dye[channel];
@@ -123,7 +114,10 @@ function addRow(table, dye, selected) {
     "use strict";
     var row = table.insertRow(table.rows.length);
     var cell = row.insertCell();
-    cell.innerHTML = makeLink(dye.itemName, "http://neverwinter.gamepedia.com/" + dye.itemName.replace(/\ /g, "_"));
+    var link = document.createElement("a");
+    link.setAttribute("href", "http://neverwinter.gamepedia.com/" + dye.itemName.replace(/\ /g, "_"));
+    link.textContent = dye.itemName;
+    cell.appendChild(link);
     cell.className = "nowrap";
     cell = row.insertCell();
     cell.innerHTML = makeTooltip(dye, "primary", selected);
