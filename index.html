@@ -115,7 +115,7 @@ function addRow(table, dye, selected) {
     var row = table.insertRow(table.rows.length);
     var cell = row.insertCell();
     var link = document.createElement("a");
-    link.setAttribute("href", "http://neverwinter.gamepedia.com/" + dye.itemName.replace(/\ /g, "_"));
+    link.setAttribute("href", "http://neverwinter.gamepedia.com/" + dye.itemName.replace(/\s/g, "_"));
     link.textContent = dye.itemName;
     cell.appendChild(link);
     cell.className = "nowrap";
@@ -143,9 +143,10 @@ function update() {
     var sorted = dyePacks.sort(function (a, b) {
         return a[selected] - b[selected];
     });
-    var i;
-    for (i = 0; i < sorted.length; i += 1) {
+    var i = 0;
+    while (i < sorted.length) {
         addRow(table, sorted[i], selected);
+        i += 1;
     }
 }
 
@@ -188,9 +189,10 @@ function getHue(dye, channel) {
 
 function initialize() {
     "use strict";
-    var i;
+    var i = dyePacks.length;
     var dye;
-    for (i = 0; i < dyePacks.length; i += 1) {
+    while (i > 0) {
+        i -= 1;
         dye = dyePacks[i];
         dye.primaryR = getR(dye.primary);
         dye.primaryG = getG(dye.primary);
